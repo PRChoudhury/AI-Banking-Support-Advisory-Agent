@@ -1,0 +1,15 @@
+langchain
+langgraph
+langchain-community
+langchain-openai
+langchain-text-splitters
+pypdf
+faiss-cpu
+streamlit
+openai
+python-dotenv
+rank_bm25
+numpy
+transformers
+sentence-transformers
+torchvision
