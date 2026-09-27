@@ -1,6 +1,5 @@
 from functools import lru_cache
 from typing import Annotated, TypedDict
-from langchain.agents import create_agent
 from langchain.chat_models import init_chat_model
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -22,24 +21,28 @@ from src.agent.prompts.prompt_styles import prompt_style
 from utils import log_interaction, reset_log
 from src.agent import guardrails 
 
-version = "version-3"
-LOG_FILE = config.USER_INTERACTION_LOG_DIR / f"user_interaction_prompt_{version}.log"
-SYS_PROMPT = Path(__file__).parent /f"prompts/{version}/SYSTEM-PROMPT.md"
 
 _api_key = os.getenv("OPENAI_API_KEY")
 _model= os.getenv("CHAT_MODEL")
 
-llm = init_chat_model(
-    api_key=_api_key,
-    model=_model,
-    temperature=0.2,
-    max_tokens=1000
-)
+PROMPT_VERSION = "version-3"
+DEMO = False
+
+def _log_file(version: str, demo: bool = DEMO) -> Path:
+    log_dir = (config.PROJECT_DIR / "scripts") if demo else config.USER_INTERACTION_LOG_DIR
+    log_dir.mkdir(parents=True, exist_ok=True)
+    return log_dir / f"user_interaction_prompt_{version}.log"
+
+@lru_cache(maxsize=8)
+def _load_system_message(version: str) -> ChatPromptTemplate:
+    sys_prompt = Path(__file__).parent / f"prompts/{version}/SYSTEM-PROMPT.md"
+    return ChatPromptTemplate.from_messages([
+        ("system", sys_prompt.read_text(encoding="utf-8")),
+        MessagesPlaceholder("chat_history"),
+    ])
+
 tools = [kb_lookup, escalate_to_human, emi_calculator]
-SYSTEM_MESSAGE = ChatPromptTemplate.from_messages([
-    ("system", SYS_PROMPT.read_text(encoding="utf-8")),
-    MessagesPlaceholder("chat_history"),
-])
+SYSTEM_MESSAGE = _load_system_message(PROMPT_VERSION)
 DEFAULT_STYLE = "Balanced"
 FEEDBACK_STYLE = {
     "too short": "Detailed",
@@ -49,7 +52,6 @@ FEEDBACK_STYLE = {
 }
 STYLE_INSTRUCTIONS = prompt_style.STYLE_PROMPTS
 
-# agent = create_agent(llm, tools= tools)
 # ---------------------------------------------------------------------------
 # Callback to print tool calls as they happen
 # ---------------------------------------------------------------------------
@@ -240,7 +242,7 @@ def get_graph(model: str , verbose: bool = True):
 
 
 def stream_research_agent(question, history=None, style=None, model=config.CHAT_MODEL,
-                          verbose=True, sink=None):
+                          verbose=True, sink=None, version=PROMPT_VERSION, demo=DEMO):
 
     graph = get_graph(model=model, verbose=verbose)
     final_messages = []
@@ -271,18 +273,18 @@ def stream_research_agent(question, history=None, style=None, model=config.CHAT_
     if verbose:
         print("\n" + "-" * 60)
         print(raw)
-    log_interaction(LOG_FILE, version, question, raw, style)
+    log_interaction(_log_file(version, demo), version, question, raw, style)
 
     if sink is not None:
         sink["answer"] = raw
         sink["sources"] = collect_sources(final_messages)
 
 
-def run_research_agent(question, history="", style=None, model=config.CHAT_MODEL, verbose=True):
+def run_research_agent(question, history="", style=None, model=config.CHAT_MODEL, verbose=True, version=PROMPT_VERSION, demo=DEMO):
     """Blocking wrapper — unchanged signature and return contract."""
     sink = {}
     for _ in stream_research_agent(
-        question, history=history, style=style, model=model, verbose=verbose, sink=sink,
+        question, history=history, style=style, model=model, verbose=verbose, sink=sink, version=version, demo=demo,
     ):
         pass
     return sink.get("answer", ""), sink.get("sources", [])
