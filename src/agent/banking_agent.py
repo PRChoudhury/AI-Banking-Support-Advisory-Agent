@@ -29,7 +29,7 @@ PROMPT_VERSION = "version-3"
 DEMO = False
 
 def _log_file(version: str, demo: bool = DEMO) -> Path:
-    log_dir = (config.PROJECT_DIR / "scripts") if demo else config.USER_INTERACTION_LOG_DIR
+    log_dir = (config.PROJECT_DIR / "demo_scripts") if demo else config.USER_INTERACTION_LOG_DIR
     log_dir.mkdir(parents=True, exist_ok=True)
     return log_dir / f"user_interaction_prompt_{version}.log"
 
