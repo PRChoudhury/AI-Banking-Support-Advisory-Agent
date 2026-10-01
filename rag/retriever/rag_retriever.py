@@ -50,8 +50,8 @@ def load_indices():
 class HybridRetriever:
     def __init__(self, embed_model: SentenceTransformer | None = None,
                  reranker: CrossEncoder | None = None,
-                 k_per_retriever: int = 20,
-                 fused_top_n: int = 10):
+                 k_per_retriever: int = 30,
+                 fused_top_n: int = 15):
         if embed_model is None:
             embed_model = SentenceTransformer(config.EMBEDDING_MODEL_ST)
         if reranker is None:
@@ -65,7 +65,7 @@ class HybridRetriever:
         bm25_results = RunnableLambda(lambda q: self.bm25_search(q["query"], k = q["k"])),
         ann_results =  RunnableLambda(lambda q: self.ann_search(q["query"], k = q["k"])))
 
-    def bm25_search(self, query: str, k: int = 20) -> list[tuple[int, float]]:
+    def bm25_search(self, query: str, k: int) -> list[tuple[int, float]]:
         """Returns [(chunk_id, bm25_score), ...] sorted best-first."""
         scores = self.bm25_store["bm25"].get_scores(tokenize(query))
         k = min(k, len(scores))
@@ -73,7 +73,7 @@ class HybridRetriever:
         top_idx = top_idx[np.argsort(scores[top_idx])[::-1]]
         return [(int(i), float(scores[i])) for i in top_idx]
 
-    def ann_search(self, query: str, k: int = 20) -> list[tuple[int, float]]:
+    def ann_search(self, query: str, k: int) -> list[tuple[int, float]]:
         """Returns [(chunk_id, ip_score), ...] sorted best-first."""
         q_emb = self.embed_query(query)
         scores, idx = self.faiss_index.search(q_emb, k) 
@@ -97,7 +97,7 @@ class HybridRetriever:
         candidates = self.hybrid_retrieve(query, k_per_retriever=self.k_per_retriever, fused_top_n=self.fused_top_n)
         return self.rerank(query, candidates, top_k=final_k)
     
-    def rerank(self, query: str, candidates: list[dict], top_k: int = 5) -> list[dict]:
+    def rerank(self, query: str, candidates: list[dict], top_k: int) -> list[dict]:
         pairs = [(query, c["text"]) for c in candidates]
         scores = self.reranker.predict(pairs)  # higher = more relevant
         for c, s in zip(candidates, scores):

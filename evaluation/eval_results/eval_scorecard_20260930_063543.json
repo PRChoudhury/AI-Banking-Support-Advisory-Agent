@@ -1,0 +1,55 @@
+{
+  "version-3": {
+    "Correctness": {
+      "value": 53.3,
+      "target": "≥ 95%",
+      "status": "FAIL",
+      "blocking": false,
+      "cases": 15
+    },
+    "Coherence": {
+      "value": 4.68,
+      "target": "avg ≥ 4/5",
+      "status": "PASS",
+      "blocking": false,
+      "cases": 25
+    },
+    "No Hallucination": {
+      "value": 100.0,
+      "target": "100%",
+      "status": "PASS",
+      "blocking": true,
+      "cases": 2
+    },
+    "Scope & Compliance": {
+      "value": 100.0,
+      "target": "100%",
+      "status": "PASS",
+      "blocking": true,
+      "cases": 8
+    },
+    "Latency": {
+      "value": 8.76,
+      "target": "p95 ≤ 10 s",
+      "status": "PASS",
+      "blocking": false,
+      "cases": 25
+    },
+    "Tool Selection": {
+      "value": 80.0,
+      "target": "≥ 90%",
+      "status": "FAIL",
+      "blocking": false,
+      "cases": 25
+    },
+    "Tool Trajectory": {
+      "value": 100.0,
+      "target": "≥ 90%",
+      "status": "PASS",
+      "blocking": false,
+      "cases": 3
+    },
+    "Overall Score (%)": 86.8,
+    "Release Gate": "OK"
+  }
+}

@@ -25,11 +25,11 @@ from src.agent import guardrails
 _api_key = os.getenv("OPENAI_API_KEY")
 _model= os.getenv("CHAT_MODEL")
 
-PROMPT_VERSION = "version-3"
+PROMPT_VERSION = "version-3.1"
 DEMO = False
 
 def _log_file(version: str, demo: bool = DEMO) -> Path:
-    log_dir = (config.PROJECT_DIR / "demo_scripts") if demo else config.USER_INTERACTION_LOG_DIR
+    log_dir = (config.PROJECT_DIR.parent / "demo_scripts") if demo else config.USER_INTERACTION_LOG_DIR
     log_dir.mkdir(parents=True, exist_ok=True)
     return log_dir / f"user_interaction_prompt_{version}.log"
 
@@ -42,7 +42,6 @@ def _load_system_message(version: str) -> ChatPromptTemplate:
     ])
 
 tools = [kb_lookup, escalate_to_human, emi_calculator]
-SYSTEM_MESSAGE = _load_system_message(PROMPT_VERSION)
 DEFAULT_STYLE = "Balanced"
 FEEDBACK_STYLE = {
     "too short": "Detailed",
@@ -85,8 +84,9 @@ def get_question(state) -> str:
 # Build graph
 # ---------------------------------------------------------------------------
 
-def build_graph(model=_model, verbose=True):
-
+def build_graph(model=_model, verbose=True, version=PROMPT_VERSION):
+    
+    SYSTEM_MESSAGE = _load_system_message(version)
     def log_step(name, detail=""):
         if verbose:
             print("  [" + name + "] " + str(detail)[:120])
@@ -232,19 +232,19 @@ def collect_sources(messages) -> list[dict]:
     return sources
 
 @lru_cache(maxsize=4)
-def _build_cached(model: str, verbose: bool):
+def _build_cached(model: str, verbose: bool, version: str):
     """Keyed on canonical args only — never call this directly."""
-    return build_graph(model=model, verbose=verbose)
+    return build_graph(model=model, verbose=verbose, version=version)
 
-def get_graph(model: str , verbose: bool = True):
+def get_graph(model: str , verbose: bool = True, version:str=PROMPT_VERSION):
     # reset_log(LOG_FILE)
-    return _build_cached(model or config.CHAT_MODEL, verbose)
+    return _build_cached(model or config.CHAT_MODEL, verbose, version)
 
 
 def stream_research_agent(question, history=None, style=None, model=config.CHAT_MODEL,
                           verbose=True, sink=None, version=PROMPT_VERSION, demo=DEMO):
 
-    graph = get_graph(model=model, verbose=verbose)
+    graph = get_graph(model=model, verbose=verbose, version=version)
     final_messages = []
     callbacks = [PrintToolCallsCallback()] if verbose else []
     question = guardrails.sanitize_and_respond(question)

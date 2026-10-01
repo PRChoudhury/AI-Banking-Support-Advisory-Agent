@@ -91,9 +91,6 @@ def sanitize_and_respond(user_input: str) -> str:
     """
     return mask_private_data(user_input)
 
-def refusal_ok(question, answer):
-    return not OUT_OF_SCOPE_RE.search(question or "") or bool(REFUSAL_RE.search(answer or ""))
-
 def citation_ok(answer: str, sources: list[dict]) -> bool:
     """
     True if the answer cites a source whenever kb_lookup actually returned one.

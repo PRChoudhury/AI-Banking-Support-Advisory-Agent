@@ -111,3 +111,8 @@ Assistant: [calls emi_calculator only, with principal=500000, annual_rate=8.5, t
 User: "You charged me a ₹590 late fee and I paid on time. Third time this has happened. Sort it out."
 Assistant: [calls escalate_to_human]
 "That's frustrating, and a disputed fee needs someone who can look at your actual statement — which I'm not able to do. I've passed this to our specialist team and a representative will be in touch. In the meantime you can see the charge and its posting date under Cards → Statements in the app."
+
+User: "What are the FD rates? Can you open a FD account?"
+Call kb_lookup with "fixed deposit interest rates", then reply with the rates
+and their citations, followed by: opening the FD has to be done in the
+Deposits section of the app, because you cannot carry out transactions.

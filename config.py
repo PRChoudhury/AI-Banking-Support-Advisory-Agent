@@ -37,7 +37,7 @@ RERANKER_MODEL = os.getenv("RERANKER_MODEL", "BAAI/bge-reranker-base")
 RERANKER_MAX_LENGTH = int(os.getenv("RERANKER_MAX_LENGTH", "512"))
 
 # Number of chunks retrieved per query.
-TOP_K = int(os.getenv("TOP_K", "4"))
+TOP_K = int(os.getenv("TOP_K", "6"))
 MAX_TOOL_ROUNDS = 6
 
 # Default message for NO ANSWER
