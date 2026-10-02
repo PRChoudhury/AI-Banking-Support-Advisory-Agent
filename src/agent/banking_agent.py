@@ -1,25 +1,29 @@
+# Standard library imports
+import os
 from functools import lru_cache
+from pathlib import Path
 from typing import Annotated, TypedDict
+
+# Third-party imports
+from dotenv import load_dotenv
 from langchain.chat_models import init_chat_model
 from langchain_core.callbacks import BaseCallbackHandler
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import AIMessage, HumanMessage, RemoveMessage, ToolMessage
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
 
-import os
-from pathlib import Path
-from dotenv import load_dotenv
+# Local application imports
 import config
-load_dotenv()
-
-from src.tools.kb_lookup_tool import kb_lookup
-from src.tools.escalate_to_human import escalate_to_human
-from src.tools.emi_calculator import emi_calculator
+from src.agent import guardrails
 from src.agent.prompts.prompt_styles import prompt_style
+from src.tools.emi_calculator import emi_calculator
+from src.tools.escalate_to_human import escalate_to_human
+from src.tools.kb_lookup_tool import kb_lookup
 from utils import log_interaction, reset_log
-from src.agent import guardrails 
+
+load_dotenv()
 
 
 _api_key = os.getenv("OPENAI_API_KEY")

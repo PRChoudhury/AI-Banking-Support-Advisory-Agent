@@ -1,16 +1,16 @@
-# Standard Libraries
-from functools import lru_cache
+# Standard library imports
 import os
 import pickle
 import re
+from functools import lru_cache
 
-# Import Third-party libraries
+# Third-party imports
 import faiss
-from langchain_core.runnables import RunnableLambda, RunnableParallel
 import numpy as np
+from langchain_core.runnables import RunnableLambda, RunnableParallel
 from sentence_transformers import CrossEncoder, SentenceTransformer
 
-# Local modules
+# Local application imports
 import config
 
 def check_api_key() -> None:

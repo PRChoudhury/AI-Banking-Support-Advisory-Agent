@@ -1,22 +1,22 @@
-# Import Third-party libraries
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from transformers import AutoTokenizer
-from sentence_transformers import SentenceTransformer
-from rank_bm25 import BM25Okapi
-from typing import Optional
-
-# Local modules
+# Standard library imports
+import pickle
 import re
 import sys
 from pathlib import Path
+from typing import Optional
 
-# PHASE-5 root holds config.py; put it on the path before importing it so
-# `python src/ingest.py` and `python -m src.ingest` both work.
+# Third-party imports
+import faiss
+import numpy as np
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from rank_bm25 import BM25Okapi
+from sentence_transformers import SentenceTransformer
+from transformers import AutoTokenizer
+
+# Local application imports
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import config
-import faiss, pickle
-import numpy as np
 
 # UTIL METHODS
 def capture_metadata(chunks):
