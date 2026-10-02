@@ -29,7 +29,7 @@ load_dotenv()
 _api_key = os.getenv("OPENAI_API_KEY")
 _model= os.getenv("CHAT_MODEL")
 
-PROMPT_VERSION = "version-3.1"
+PROMPT_VERSION = "version-3.2"
 DEMO = False
 
 def _log_file(version: str, demo: bool = DEMO) -> Path:
