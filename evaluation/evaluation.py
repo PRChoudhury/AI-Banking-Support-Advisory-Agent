@@ -2,9 +2,6 @@
 evaluation.py — AI Banking Support & Advisory Agent: evaluation against the
 finalized success criteria.
 
-Built on the evaluator pattern from AI_Agent_Evaluation.ipynb
-(run_agent → one evaluator per criterion → per-case score → scorecard).
-
 Success criteria (target)
     1. Correctness                 right figures for the question; every figure traceable to
                                    retrieved documents or tool output; citations point to
@@ -24,7 +21,7 @@ A criterion that does not apply to a case is N/A and excluded from that case's
 score. Case score = % of applicable criteria passed; overall = mean case score.
 
 Usage
-    python evaluation.py                                  # version-3, 1 run, with judge
+    python evaluation.py                                  # version-3.2, 1 run, with judge
     python evaluation.py --versions version-1 version-2 version-3
     python evaluation.py --runs 3                         # a criterion passes only if all runs pass
     python evaluation.py --no-judge --cases F01 C04 T01
@@ -35,9 +32,6 @@ Environment
     JUDGE_MODEL         coherence judge model (default: gpt-4o)
     BANKING_AGENT_ROOT  project folder, if not the default below
 
-Note: for PII cases the check on logs runs the app's own entry point
-(run_research_agent with demo=True), which appends to the project's
-scripts/user_interaction_prompt_<version>.log demo log.
 """
 
 from __future__ import annotations
@@ -55,7 +49,7 @@ import pandas as pd
 
 
 # =============================================================================
-# 0. Locate and import the project agent (nothing in the project is modified)
+# Locate and import the project agent
 # =============================================================================
 
 PROJECT_FOLDER_NAME = "AI Banking Support & Advisory Agent"
@@ -85,11 +79,14 @@ def load_project(project_root: Path) -> None:
     from dotenv import load_dotenv
     load_dotenv(project_root / ".env")
 
+    from utils import check_api_key
+    check_api_key()
+
     global config, guardrails, banking_agent, HumanMessage, AIMessage, ToolMessage
-    import config  # noqa: F401
-    from src.agent import guardrails  # noqa: F401
-    from src.agent import banking_agent  # noqa: F401
-    from langchain_core.messages import HumanMessage, AIMessage, ToolMessage  # noqa: F401
+    import config
+    from src.agent import guardrails
+    from src.agent import banking_agent 
+    from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
 
 
 def warm_up(versions: list[str]) -> None:
@@ -137,8 +134,7 @@ def normalize(text: str) -> str:
 
 
 # =============================================================================
-# 2. Run the agent and capture evaluation data (notebook's run_agent, adapted
-#    to the project graph, the app's PII masking and multi-turn history)
+# 2. Run the agent and capture evaluation data
 # =============================================================================
 
 def run_agent(turns: list[str], version: str, style: str = "Balanced") -> dict:
@@ -153,7 +149,7 @@ def run_agent(turns: list[str], version: str, style: str = "Balanced") -> dict:
     final_answer = ""
 
     for turn in turns:
-        masked = guardrails.sanitize_and_respond(turn)          # same masking as app.py
+        masked = guardrails.sanitize_and_respond(turn)  
         llm_inputs.append(masked)
         evidence_parts.append(masked)
 
@@ -409,9 +405,6 @@ def evaluate_trajectory(actual_trajectory: list[str],
 
 # =============================================================================
 # 4. Evaluation dataset — 25 cases
-#    expected_all: facts that must appear (nested list = any one alternative)
-#    scope: transaction | identity | injection | advice | pii
-#    expected_trajectory: only where order matters (None = N/A)
 # =============================================================================
 
 KB, EMI, ESC = "kb_lookup", "emi_calculator", "escalate_to_human"

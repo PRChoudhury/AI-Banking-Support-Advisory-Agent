@@ -13,12 +13,6 @@ from sentence_transformers import CrossEncoder, SentenceTransformer
 # Local application imports
 import config
 
-def check_api_key() -> None:
-    if not os.getenv("OPENAI_API_KEY"):
-        raise RuntimeError(
-            "OPENAI_API_KEY is not set. Add it to your .env file before starting the app."
-        )
-
 def tokenize(text: str) -> list[str]:
     return re.findall(r"\w+", text.lower())
 
@@ -39,12 +33,21 @@ def reciprocal_rank_fusion(
     return sorted(fused_scores.items(), key=lambda x: x[1], reverse=True)
 
 def load_indices():
-    with open(config.VECTORSTORE_DIR / "bm25.pkl", "rb") as f:
-        bm25_store = pickle.load(f)
-    faiss_index = faiss.read_index(str(config.VECTORSTORE_DIR / "index.faiss"))
-    with open(config.VECTORSTORE_DIR / "metadata.pkl", "rb") as f:
-        chunk_records = pickle.load(f)
-    return bm25_store, faiss_index, chunk_records
+    try:
+        with open(config.VECTORSTORE_DIR / "bm25.pkl", "rb") as f:
+            bm25_store = pickle.load(f)
+
+        faiss_index = faiss.read_index(str(config.VECTORSTORE_DIR / "index.faiss"))
+
+        with open(config.VECTORSTORE_DIR / "metadata.pkl", "rb") as f:
+            chunk_records = pickle.load(f)
+
+        return bm25_store, faiss_index, chunk_records
+    except Exception as exc:
+        raise RuntimeError(
+            f"Failed to load vectorstore files from {config.VECTORSTORE_DIR}. "
+            "Ensure the ingestion pipeline has run and the index files exist."
+        ) from exc
 
 
 class HybridRetriever:

@@ -21,13 +21,13 @@ from src.agent.prompts.prompt_styles import prompt_style
 from src.tools.emi_calculator import emi_calculator
 from src.tools.escalate_to_human import escalate_to_human
 from src.tools.kb_lookup_tool import kb_lookup
-from utils import log_interaction, reset_log
+from utils import check_api_key, log_interaction, reset_log
 
 load_dotenv()
 
-
+check_api_key()
 _api_key = os.getenv("OPENAI_API_KEY")
-_model= os.getenv("CHAT_MODEL")
+_model = os.getenv("CHAT_MODEL")
 
 PROMPT_VERSION = "version-3.2"
 DEMO = False

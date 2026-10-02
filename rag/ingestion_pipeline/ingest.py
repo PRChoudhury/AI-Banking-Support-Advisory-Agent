@@ -100,12 +100,10 @@ class RagIngestionPipeline:
             try:
                 loader = PyPDFLoader(str(pdf_path))
                 pages = loader.load()
-                metadata = extract_metadata(pdf_path)
             except Exception as exc:
                 print(f"  Skipping {pdf_path.name}: {exc}")
                 continue
             for page in pages:
-                # page.metadata.update(metadata)
                 page.metadata["page"] = page.metadata.get("page", 0) + 1
                 page.metadata["source"] = pdf_path.name
             docs.extend(pages)

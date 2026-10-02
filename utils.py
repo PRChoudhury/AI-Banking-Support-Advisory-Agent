@@ -1,6 +1,7 @@
 import config
 from datetime import datetime
 from pathlib import Path
+import os
 
 def load_role(name: str) -> str:
     """
@@ -40,3 +41,13 @@ def log_interaction(log_file, version, query: str, response: str, style: str) ->
     log_to_file(log_file, version, f"STYLE USED | {style}")
     log_to_file(log_file, version, f"RESPONSE | {response}")
     log_to_file(log_file, version, "=" * 59 + "\n")
+
+# -------------------------------
+# CHECK API KEY
+# -------------------------------
+
+def check_api_key() -> None:
+    if not os.getenv("OPENAI_API_KEY"):
+        raise RuntimeError(
+            "OPENAI_API_KEY is not set. Add it to your .env file before starting the app."
+        )
