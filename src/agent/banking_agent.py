@@ -97,6 +97,8 @@ def build_graph(model=_model, verbose=True, version=PROMPT_VERSION):
 
     llm = init_chat_model(
         model=model,
+        top_k=30,
+        top_p=0.9,
         temperature=0.1,
         api_key=_api_key)
     
